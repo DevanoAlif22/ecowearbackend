@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DB_URL")
+}
+
+model artikel {
+  id             Int      @id @default(autoincrement())
+  author         String   @db.VarChar(250)
+  judul          String   @db.VarChar(250)
+  isi            String   @db.LongText
+  referensi      String   @db.Text
+  dilihat        Int
+  
+  gambar         String?  @db.Text
+  tanggal_dibuat DateTime @default(now()) @db.Timestamp(0)
+}
+
+model berbagi_produk {
+  id                      Int                       @id @default(autoincrement())
+  id_user                 Int
+  nama                    String                    @db.VarChar(150)
+  deskripsi               String                    @db.Text
+  kebutuhan               String                    @db.Text
+  gambar                  String                    @db.VarChar(250)
+  alamat                  String                    @db.Text
+  tanggal_dibuat          DateTime                  @default(now()) @db.Timestamp(0)
+  user                    user                      @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "berbagi_produk_ibfk_2")
+  komentar_produk_berbagi komentar_produk_berbagi[]
+
+  @@index([id_user], map: "id_user")
+}
+
+model gallery_produk_berbagi {
+  id               Int                @id @default(autoincrement())
+  file             String             @db.Text
+  path_file        String             @db.Text
+  kebutuhan_produk kebutuhan_produk[]
+}
+
+model gallery_produk_jual {
+  id          Int         @id @default(autoincrement())
+  id_produk   Int
+  file        String?     @db.Text
+  path_file   String      @db.Text
+  is_png      Boolean
+  produk_jual produk_jual @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "gallery_produk_jual_ibfk_1")
+
+  @@index([id_produk], map: "gallery_produk_jual_ibfk_1")
+}
+
+model komentar_produk {
+  id             Int         @id @default(autoincrement())
+  id_produk      Int
+  id_user        Int
+  isi            String      @db.Text
+  tanggal_dibuat DateTime    @default(now()) @db.Timestamp(0)
+  produk_jual    produk_jual @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "komentar_produk_ibfk_1")
+  user           user        @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "komentar_produk_ibfk_2")
+
+  @@index([id_user], map: "id_user")
+  @@index([id_produk], map: "komentar_produk_ibfk_1")
+}
+
+model komentar_produk_berbagi {
+  id             Int            @id @default(autoincrement())
+  id_produk      Int
+  id_user        Int
+  isi            String         @db.Text
+  is_approve     Boolean
+  gambar         String         @db.VarChar(250)
+  tanggal_dibuat DateTime       @default(now()) @db.Timestamp(0)
+  berbagi_produk berbagi_produk @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "komentar_produk_berbagi_ibfk_1")
+  user           user           @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "komentar_produk_berbagi_ibfk_2")
+
+  @@index([id_user], map: "id_user")
+  @@index([id_produk], map: "komentar_produk_berbagi_ibfk_1")
+}
+
+model komentar_produk_tukar {
+  id               Int                @id @default(autoincrement())
+  id_produk        Int
+  id_user          Int
+  isi              String             @db.Text
+  is_approve       Boolean
+  gambar           String             @db.VarChar(250)
+  alamat           String             @db.Text
+  tanggal_dibuat   DateTime           @default(now()) @db.Timestamp(0)
+  tukar_produk     tukar_produk       @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "komentar_produk_tukar_ibfk_1")
+  user             user               @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "komentar_produk_tukar_ibfk_2")
+  penukaran_produk penukaran_produk[]
+
+  @@index([id_user], map: "id_user")
+  @@index([id_produk], map: "komentar_produk_tukar_ibfk_1")
+}
+
+model penukaran_poin {
+  id             Int      @id @default(autoincrement())
+  id_user        Int
+  total_poin     Int
+  total_uang     Int
+  status         String   @db.VarChar(150)
+  tanggal_dibuat DateTime @default(now()) @db.Timestamp(0)
+  user           user     @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "penukaran_poin_ibfk_1")
+
+  @@index([id_user], map: "id_user")
+}
+
+model penukaran_produk {
+  id                     Int                   @id @default(autoincrement())
+  id_tukar_produk        Int
+  id_komentar            Int
+  id_user                Int
+  status                 String                @db.VarChar(100)
+  bukti_pengiriman_mitra String?               @db.Text
+  bukti_pengiriman_user  String?               @db.Text
+  tanggal_dibuat         DateTime              @default(now()) @db.Timestamp(0)
+  tanggal_berhasil       DateTime?             @db.Timestamp(0)
+  tukar_produk           tukar_produk          @relation(fields: [id_tukar_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "penukaran_produk_ibfk_1")
+  user                   user                  @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "penukaran_produk_ibfk_2")
+  komentar_produk_tukar  komentar_produk_tukar @relation(fields: [id_komentar], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "penukaran_produk_ibfk_3")
+
+  @@index([id_user], map: "id_user")
+  @@index([id_tukar_produk], map: "penukaran_produk_ibfk_1")
+  @@index([id_komentar], map: "id_komentar")
+}
+
+model produk_jual {
+  id                  Int                   @id @default(autoincrement())
+  id_kategori         Int
+  id_user             Int
+  nama                String                @db.VarChar(100)
+  deskripsi           String                @db.Text
+  harga               Int?
+  jumlah              Int
+  tanggal_dibuat      DateTime              @default(now()) @db.Timestamp(0)
+  gallery_produk_jual gallery_produk_jual[]
+  komentar_produk     komentar_produk[]
+  kategori            kategori              @relation(fields: [id_kategori], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "produk_jual_ibfk_1")
+  user                user                  @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "produk_jual_ibfk_2")
+  transaksi_produk    transaksi_produk[]
+  ukuran_produk       ukuran_produk[]
+  warna_produk        warna_produk[]
+
+  @@index([id_user], map: "id_user")
+  @@index([id_kategori], map: "produk_jual_ibfk_1")
+}
+
+model role {
+  id   Int    @id @default(autoincrement())
+  nama String @db.VarChar(150)
+  user user[]
+}
+
+model transaksi_produk {
+  id                     Int         @id @default(autoincrement())
+  id_produk              Int
+  id_user                Int
+  jumlah                 Int
+  total_harga            Int
+  status                 String      @db.VarChar(100)
+  alamat                 String      @db.Text
+  bukti_pengiriman_mitra String?     @db.Text
+  bukti_pengiriman_user  String?     @db.Text
+  bukti_transfer_admin   String?     @db.VarChar(250)
+  snap_token             String?     @db.Text
+  snap_redirect_url      String?     @db.Text
+  payment_method         String?     @db.VarChar(250)
+  tanggal_berhasil       DateTime?   @db.Timestamp(0)
+  tanggal_dibuat         DateTime    @default(now()) @db.Timestamp(0)
+  produk_jual            produk_jual @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "transaksi_produk_ibfk_1")
+  user                   user        @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "transaksi_produk_ibfk_2")
+
+  @@index([id_user], map: "id_user")
+  @@index([id_produk], map: "transaksi_produk_ibfk_1")
+}
+
+model tukar_produk {
+  id                     Int                     @id @default(autoincrement())
+  id_kategori            Int
+  id_user                Int
+  nama                   String                  @db.VarChar(150)
+  deskripsi              String                  @db.Text
+  ukuran                 String                  @db.VarChar(150)
+  status                 String                  @db.VarChar(150)
+  alamat                 String                  @db.Text
+  bukti_pengiriman_mitra String?                 @db.VarChar(250)
+  tanggal_dibuat         DateTime                @default(now()) @db.Timestamp(0)
+  gallery_produk_tukar   gallery_produk_tukar[]
+  komentar_produk_tukar  komentar_produk_tukar[]
+  penukaran_produk       penukaran_produk[]
+  kategori               kategori                @relation(fields: [id_kategori], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tukar_produk_ibfk_1")
+  user                   user                    @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tukar_produk_ibfk_2")
+
+  @@index([id_user], map: "id_user")
+  @@index([id_kategori], map: "tukar_produk_ibfk_1")
+}
+
+model user {
+  id                      Int                       @id @default(autoincrement())
+  id_role                 Int
+  uuid_session            String                    @db.VarChar(250)
+  nama                    String                    @db.VarChar(200)
+  jenis                   String?                   @db.VarChar(250)
+  email                   String                    @db.VarChar(200)
+  password                String                    @db.VarChar(250)
+  nomor_telepon           String?                   @db.VarChar(100)
+  bio                     String?                   @db.Text
+  status                  String?                   @db.VarChar(150)
+  profil                  String?                   @db.Text
+  path_profil             String?                   @db.Text
+  badan                   String?                   @db.Text
+  ktp                     String?                   @db.Text
+  path_ktp                String?                   @db.Text
+  dokumen_pendukung       String?                   @db.Text
+  path_dokumen_pendukung  String?                   @db.Text
+  nomor_rekening          String?                   @db.VarChar(100)
+  nama_rekening           String?                   @db.VarChar(100)
+  poin                    Int?
+  tanggal_dibuat          DateTime                  @default(now()) @db.Timestamp(0)
+  berbagi_produk          berbagi_produk[]
+  komentar_produk         komentar_produk[]
+  komentar_produk_berbagi komentar_produk_berbagi[]
+  komentar_produk_tukar   komentar_produk_tukar[]
+  penukaran_poin          penukaran_poin[]
+  penukaran_produk        penukaran_produk[]
+  produk_jual             produk_jual[]
+  transaksi_produk        transaksi_produk[]
+  tukar_produk            tukar_produk[]
+  role                    role                      @relation(fields: [id_role], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_ibfk_1")
+
+  @@index([id_role], map: "user_ibfk_1")
+}
+
+model kategori {
+  id           Int            @id @default(autoincrement())
+  nama         String         @db.VarChar(150)
+  produk_jual  produk_jual[]
+  tukar_produk tukar_produk[]
+}
+
+model ukuran_produk {
+  id          Int         @id @default(autoincrement())
+  id_produk   Int
+  nama        String      @db.VarChar(150)
+  produk_jual produk_jual @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ukuran_produk_ibfk_1")
+
+  @@index([id_produk], map: "ukuran_produk_ibfk_1")
+}
+
+model warna_produk {
+  id          Int         @id @default(autoincrement())
+  id_produk   Int
+  nama        String      @db.VarChar(250)
+  produk_jual produk_jual @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "warna_produk_ibfk_1")
+
+  @@index([id_produk], map: "id_produk")
+}
+
+model kebutuhan_produk {
+  id                     Int                    @id @default(autoincrement())
+  id_produk              Int
+  nama                   String                 @db.VarChar(200)
+  gallery_produk_berbagi gallery_produk_berbagi @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "kebutuhan_produk_ibfk_1")
+
+  @@index([id_produk], map: "id_produk")
+}
+
+model gallery_produk_tukar {
+  id           Int          @id @default(autoincrement())
+  id_produk    Int
+  path_file    String       @db.Text
+  is_png       Boolean
+  tukar_produk tukar_produk @relation(fields: [id_produk], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "gallery_produk_tukar_ibfk_1")
+
+  @@index([id_produk], map: "id_produk")
+}

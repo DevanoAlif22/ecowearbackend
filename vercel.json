@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Requested-With,Accept",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "dest": "src/server.js"
+    }
+  ],
+  "build": {
+    "env": {
+      "DB_URL": "mysql://mysql:o8mGOzzvBOkRTc1ya50E3TGEFkXTZHB7rbGlZnxJeWS9vhEAAhvF5WG8zi5HsfF7@103.157.97.105:5433/default"
+    }
+  }
+}
