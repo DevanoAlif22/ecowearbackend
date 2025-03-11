@@ -5,8 +5,7 @@ import path from "path";
 // Konfigurasi penyimpanan Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const userId = req.body.userId || "dokumenpendukung"; // Gunakan userId dari request body
-    const uploadPath = path.join("uploads", userId);
+    const uploadPath = path.join("src/uploads", "dokumenpendukung");
 
     // Buat folder jika belum ada
     if (!fs.existsSync(uploadPath)) {
