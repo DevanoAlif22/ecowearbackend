@@ -5,7 +5,7 @@ import path from "path";
 // Konfigurasi penyimpanan Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join("/src/uploads", "commentproductshare");
+    const uploadPath = path.join("src/uploads", "commentproductshare");
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
